@@ -18,9 +18,9 @@ struct item{
         strcpy(s1,name0);
         strcat(s1,"_l");
 		if(db->exists_map(s1)){
-			printf("loading item %s ...\n",name0);
+			//printf("loading item %s ...\n",name0);
 			l=db->get_map(s1);
-			printf("Item %s load done.\n",name0);
+			//printf("Item %s load done.\n",name0);
 		}
 		else{
 			printf("creating item %s ...\n",name0);
@@ -106,14 +106,14 @@ struct item{
         for(int i=0;i<num;i++)
             l.drop(s[i]);
     }
-    void delete_all(){///有问题！！
+    void delete_all(){
         char s[32];
         memset(s,0,sizeof(s));
         strcpy(s,nam);
         strcat(s,"_l");
         if(db->exists_map(s)){
         	db->delete_map(s);
-        	printf("item %s delete done.\n",s);
+        	//printf("item %s delete done.\n",s);
         }
     }
 
