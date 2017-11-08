@@ -33,7 +33,7 @@ struct item{
 
     bool add_val(unsigned char k[],unsigned n){
         if(l.exists(k)){
-            printf("Val exist!\n");
+            printf("Val exist key!\n");
             return 0;
         }
         l.add(k,n);
@@ -41,7 +41,7 @@ struct item{
     }
     bool add_val(unsigned char k[],unsigned char s[]){
         if(l.exists(k)){
-            printf("Val exist!\n");
+            printf("Val exist key!\n");
             return 0;
         }
         l.add(k,s);
@@ -50,7 +50,7 @@ struct item{
 
     bool delete_val(unsigned char k[]){
         if(!l.exists(k)){
-            printf("Not exist!\n");
+            printf("Not exist key!\n");
             return 0;
         }
         l.drop(k);
@@ -59,7 +59,7 @@ struct item{
 
 	bool modify_val(unsigned char k[],unsigned i){
         if(!l.exists(k)){
-            printf("Not exist!\n");
+            printf("Not exist key!\n");
             return 0;
         }
 		else {
@@ -69,7 +69,7 @@ struct item{
 	}
 	bool modify_val(unsigned char k[],unsigned char s[]){
         if(!l.exists(k)){
-            printf("Not exist!\n");
+            printf("Not exist key!\n");
             return 0;
         }
 		else {
@@ -80,7 +80,7 @@ struct item{
 
 	bool get_val(unsigned char k[],unsigned int *i){
         if(!l.exists(k)){
-            printf("Not exist!\n");
+            printf("Not exist key!\n");
             return 0;
         }
 		else {
@@ -90,7 +90,7 @@ struct item{
 	}
 	bool get_val(unsigned char k[],unsigned char s[]){
         if(!l.exists(k)){
-            printf("Not exist!\n");
+            printf("Not exist key!\n");
             return 0;
         }
 		else {

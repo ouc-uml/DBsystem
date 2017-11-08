@@ -136,6 +136,9 @@ struct table{
 
     item get_item(unsigned int i){
         unsigned char s[32];
+        if(!items.exists(i)){
+        	printf("Error!\n");
+        }
         items.get_by_key(i,s);
         item item_tmp((char *)s);
         return item_tmp;
@@ -183,7 +186,7 @@ struct table{
         unsigned char in_s[32]="NUL";
         for(int j=0;j<r;j++){
             row.get_by_key(keys[j],&type);
-            if(type){
+            if(type=='d'){
                 printf("A unsigned integer: \n");
                 scanf("%d",&in_i);
                 item_tmp.modify_val(keys[j],in_i);///int
@@ -217,20 +220,25 @@ struct table{
     }
 
     bool set_index(unsigned char ss[]){
-    //为名为s的列建立索引；
-        if(index.exists(ss)){
-            printf("Index for %s exsit!\n",(char*)ss);
-            return 0;
-        }
+    //为名为ss的列建立索引；
+    	if(!row.exists(ss)){
+    		printf("Not exist row %s!\n",ss);
+    		return 0;
+    	}
         unsigned char s[32],s2[32],s3[32];///索引名,临时串,临时list名
         strcpy((char*)s,name);
         strcat((char*)s,(char*)ss);
         unsigned int type;
         row.get_by_key(ss,&type);
-        //char cc=type?'d':'s';
-
-        db_map map_tmp((char*)s,type,'s');///新索引
-        index.add(ss,s);
+        if(index.exists(ss)){
+            printf("Index for %s exsit. Now recreate.\n",(char*)ss);
+            for(){/////////////
+            	db_list list_tmp=db->get_list((char*)s3);
+            }
+        	db->delete_map((char*)s);
+        }
+        db_map map_tmp=db->create_map((char*)s,type,'s');///新索引
+        if(!index.exists(ss))index.add(ss,s);
 
         if(type=='d'){
             unsigned int keys[c],val;
@@ -257,8 +265,7 @@ struct table{
                     map_tmp.add(val,s3);
                 }
             }
-        }
-        else{
+        }else{
             unsigned char val[32];
             unsigned int keys_s[c];
             items.get_all_key(keys_s);
@@ -272,18 +279,14 @@ struct table{
                     for(int k2=k1;k2<strlen((char*)val);k2++){
                         memset(s2,0,sizeof(s2));
                         memcpy(s2,val+k1,k2-k1+1);
-                        if(map_tmp.exists(s2)){
-                       			//printf("exist\n");		 
+                        if(map_tmp.exists(s2)){	 
                             map_tmp.get_by_key(s2,s3);
                             db_list list_tmp=db->get_list((char*)s3);
                             list_tmp.push_tail(keys_s[j]);
                         }else{
-                       						
-                       				printf("not exist\n");
-                       			
-                			memset(s3,0,sizeof(s3));			 
                             strcpy((char*)s3,(char*)s);
                             strcat((char*)s3,(char*)s2);
+                            //printf("s2:%s\n",s2);
                             db_list list_tmp=db->create_list((char*)s3,'d');
                             list_tmp.push_tail(keys_s[j]);
                             map_tmp.add(s2,s3);
@@ -293,6 +296,8 @@ struct table{
                 ///
             }
         }
+        printf("Index set done.\n");
+        return 1;
     }
 
     vector<unsigned int> find_by_index(unsigned char s[],unsigned int val){
@@ -305,7 +310,7 @@ struct table{
     	//校验类型
     	unsigned int type;
     	row.get_by_key(s,&type);
-    	if(!type){
+    	if(type=='s'){
     	    printf("Row %s is type of string!\n",s);
     		return v;
     	}
@@ -335,7 +340,7 @@ struct table{
     	//校验类型
     	unsigned int type;
     	row.get_by_key(s,&type);
-    	if(type){
+    	if(type=='d'){
     	    printf("Row %s is type of unsigned int!\n",s);
     		return v;
     	}
