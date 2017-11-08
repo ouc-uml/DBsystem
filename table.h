@@ -78,7 +78,7 @@ struct table{
         unsigned keys[num];
         items.get_all_key(keys);
         unsigned char tmp[32];
-        unsigned char nul[32]="NUL";
+        unsigned char nul[32]="";
         for(int i=0;i<num;i++)
         {
             items.get_by_key(keys[i],tmp);
@@ -110,7 +110,7 @@ struct table{
         unsigned char keys[r][32];
         row.get_all_key(keys);
         unsigned int type;
-        unsigned char nul[32]="NUL";
+        unsigned char nul[32]="";
         for(int i=0;i<r;i++){
         	row.get_by_key(keys[i],&type);
         	if(type=='d'){
@@ -118,6 +118,49 @@ struct table{
         	}
         	else {
         		item_tem.add_val(keys[i],nul);
+        	}
+        }
+        if(!items.exists(num)){
+        	items.add(num,(unsigned char *)s);
+        	printf("Item %d add done.\n",num);
+        }
+
+        c++;
+        return num;
+    }
+    
+    unsigned int add_item(unsigned int len,...){
+        if(len>r){
+            printf("There only %d rows in the table!\n",r);
+            return 0;
+        }
+      	va_list args;
+    	va_start(args,len);
+        ///获取空编号
+        unsigned int num;
+        items_empty.get_by_index(0,&num);
+        items_empty.pop_head();
+        if(items_empty.size==0)items_empty.push_head(num+1);
+        ///新建条目
+        char s[32],s_tem[32];
+        strcpy(s,name);
+        strcat(s,"_");
+        sprintf(s_tem, "%d", num);
+        //itoa(num,s_tem,10);
+        strcat(s,s_tem);
+        item item_tem(s);
+        unsigned char keys[r][32];
+        row.get_all_key(keys);
+        unsigned int type;
+        for(int i=0;i<r;i++){
+        	row.get_by_key(keys[i],&type);
+        	if(type=='d'){
+        		unsigned int in_i=va_arg(args,unsigned int);
+        		item_tem.add_val(keys[i],in_i);
+        	}
+        	else {
+        		unsigned char* in_s=va_arg(args,unsigned char*);
+        		item_tem.add_val(keys[i],in_s);
         	}
         }
         if(!items.exists(num)){
@@ -152,18 +195,19 @@ struct table{
         item item_tmp=get_item(i);
         unsigned char keys[r][32];
         row.get_all_key(keys);
-        unsigned int type;
-        unsigned in_i=0;
-        unsigned char in_s[32]="NUL";
+        unsigned int type,in_i=0;
+        unsigned char in_s[32]="";
         for(int j=0;j<r;j++){
             row.get_by_key(keys[j],&type);
             if(type=='d'){
-                printf("A unsigned integer for item %d, row %s: ",i,keys[j]);
+            	item_tmp.get_val(keys[j],&in_i);
+                printf("Now: %d\nNew for item %d, row %s: ",in_i,i,keys[j]);
                 scanf("%d",&in_i);
                 item_tmp.modify_val(keys[j],in_i);///int
             }
             else{
-                printf("A string for item %d, row %s: ",i,keys[j]);
+            	item_tmp.get_val(keys[j],in_s);
+                printf("Now: %s\nNew for item %d, row %s: ",in_s,i,keys[j]);
                 scanf("%s",in_s);
                 item_tmp.modify_val(keys[j],in_s);///string
             }
@@ -173,31 +217,34 @@ struct table{
         return 1;
     }
     
-    bool edit_item_1(unsigned int i){
+    bool edit_item(unsigned int i,unsigned int len,...){//unsigned char s[],
         if(!items.exists(i)){
             printf("Item %d doesn't exist!\n",i);
             return 0;
         }
+        if(len>r){
+            printf("There only %d rows in the table!\n",r);
+            return 0;
+        }
+    	va_list args;
+    	va_start(args,len);
         item item_tmp=get_item(i);
         unsigned char keys[r][32];
         row.get_all_key(keys);
         unsigned int type;
-        unsigned in_i=0;
-        unsigned char in_s[32]="NUL";
-        for(int j=0;j<r;j++){
+        for(int j=0;j<len;j++){
             row.get_by_key(keys[j],&type);
             if(type=='d'){
-                printf("A unsigned integer: \n");
-                scanf("%d",&in_i);
+            	unsigned in_i=va_arg(args,unsigned int);
                 item_tmp.modify_val(keys[j],in_i);///int
             }
             else{
-                printf("A string: \n");
-                scanf("%s",in_s);
+        		unsigned char* in_s=va_arg(args,unsigned char *);
+            	//printf("!!!%s\n",in_s);
                 item_tmp.modify_val(keys[j],in_s);///string
             }
         }
-        
+        return 1;
     }
 
     bool delete_item(unsigned int i){
@@ -217,6 +264,7 @@ struct table{
 
         items.drop(i);
         printf("Item %d deleted done.\n",i);
+        return 1;
     }
 
     bool set_index(unsigned char ss[]){
@@ -232,8 +280,14 @@ struct table{
         row.get_by_key(ss,&type);
         if(index.exists(ss)){
             printf("Index for %s exsit. Now recreate.\n",(char*)ss);
-            for(){/////////////
-            	db_list list_tmp=db->get_list((char*)s3);
+            db_map map_tmp=db->get_map((char*)s);
+            int num=map_tmp.get_size();
+            unsigned char all_keys[num][32];
+            map_tmp.get_all_key(all_keys);
+            for(int i=0;i<num;i++){/////////////
+            	memset(s3,0,sizeof(s3));
+            	map_tmp.get_by_key(all_keys[i],s3);
+            	db->delete_list((char*)s3);
             }
         	db->delete_map((char*)s);
         }
@@ -378,29 +432,30 @@ struct table{
     }
 
     void show_all(){
-        int len=r;
+    	printf("\n%s: \n",name);
+    
         int num=items.get_size();
         unsigned char keys[num][32];
-        unsigned char keys_i[len][32];
+        unsigned char keys_i[r][32];
         unsigned char val[32],val_i[32];
         unsigned int val_ii,type;
         items.get_all_key(keys);
         row.get_all_key(keys_i);
         for(int i=0;i<r;i++)
-            printf("%s ",keys_i[i]);
+            printf("%7s ",keys_i[i]);
         printf("\n");
         for(int i=0;i<num;i++){
             items.get_by_key(keys[i],val);
             item item_tmp((char*)val);
-            for(int j=0;j<len;j++){
+            for(int j=0;j<r;j++){
                 row.get_by_key(keys_i[j],&type);
                 if(type=='d'){
                     item_tmp.l.get_by_key(keys_i[j],&val_ii);
-                    printf("%d ",val_ii);
+                    printf("%7d ",val_ii);
                 }
                 else{
                     item_tmp.l.get_by_key(keys_i[j],val_i);
-                    printf("%s ",val_i);
+                    printf("%7s ",val_i);
                 }
             }
             printf("\n");

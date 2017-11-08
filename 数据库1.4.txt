@@ -50,6 +50,7 @@ map_3为属性备忘，存放 属性名—属性类型（无符号整型或字符串）
 list_1为删除链，存放暂时被删除而空置的编号，用于提供下一个插入条目的编号；
 list_4为建立了索引的属性列，存放建立了索引的属性列；
 
+
 在该结构体之外，还定义了关于列的索引用map：
 map_index，存放 列值-列编号链；
 与关于条目对应索引用的链（可视为透明）
@@ -63,15 +64,26 @@ table(unsigned char name[])
 void add_row(unsigned char s[]，char type)
 //为所有条目在末尾添加名为s的新列，值为空；
 //type为'd'添加unsigned int型，否则添加字符串；
+
+
 bool add_item()
 //添加新的空条目，添加位置随机,返回条目编号；
-    
+unsigned int add_item(unsigned int len,...)
+//添加新的空条目并编辑len个条目，添加位置随机,返回条目编号；
+
+
 int get_all_no(unsigned int i[])
 //获取所有条目编号至数组 i 中，返回条目个数;
 item get_item(unsigned int i)
 //获取编号为i的条目,注意！不检查是否存在！！
+
+
 bool edit_item(unsigned int i)
 //直接编辑第i条条目（键入），检查是否存在。
+bool edit_item(unsigned int i,unsigned int len,...)
+//直接编辑第i条条目的前len个条目（参数输入），检查是否存在。
+
+
 bool delete_item(unsigned char s[])
 //删除名为s的条目，检查是否存在，修改索引；
 
@@ -98,3 +110,5 @@ table名+"_index"
 table名+列名
 table名+列名+列值
 
+item名
+item名+“_l”

@@ -15,21 +15,20 @@ int main(){
     //*
     
     table t(s);
-    t.add_row(s1,'d');
-    t.add_row(s2,'s');
+    t.add_row(s1,'s');
+    t.add_row(s2,'d');
     t.add_item();
+    t.add_item(2,"faqwff",33);
     t.add_item();
-    t.add_item();
-    t.add_item();
-    t.add_item();
-    t.edit_item(1);
-    t.edit_item(3);
+    t.edit_item(1,2,"qwe",1);
+    t.edit_item(3,2,"qwer",2);
     //t.delete_item(2);
     
-    t.set_index(s2);
-    /*
-    vector<unsigned int> v= t.find_by_index(s2,'s');
-    printf("No. which values %d: ",0);
+    t.set_index(s1);
+    
+    unsigned char qw[32]="qw";
+    vector<unsigned int> v= t.find_by_index(s1,qw);
+    printf("No. which values qw: ");
     for(int i=0;i<v.size();i++){
     	cout<<v[i]<<"  ";
     }
