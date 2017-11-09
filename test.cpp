@@ -13,17 +13,23 @@ int main(){
     //table t1(s);
     //t1.delete_talbe();
     //*
+    char sss[k_len]="test_1_l";
     
     table t(s);
     t.add_row(s1,'s');
     t.add_row(s2,'d');
+    //printf("aiTEST:%s is %d\n",sss,t.db->exists_map(sss));
     t.add_item();
+    //printf("1TEST:%s is %d\n",sss,t.db->exists_map(sss));
     t.add_item(2,"faqwff",33);
     t.add_item();
+    
+    
     t.edit_item(1,2,"qwe",1);
     t.edit_item(3,2,"qwer",2);
-    //t.delete_item(2);
+    t.delete_item(2);
     
+    t.show_all();
     t.set_index(s1);
     
     unsigned char qw[32]="qw";

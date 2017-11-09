@@ -6,11 +6,11 @@
 /*索引在修改值时修改*/
 
 struct table{
-    char name[32];
-    char name_items[32];
-    char name_items_empty[32];
-    char name_row[32];
-    char name_index[32];
+    char name[k_len];
+    char name_items[k_len];
+    char name_items_empty[k_len];
+    char name_row[k_len];
+    char name_index[k_len];
     db_map items;///条目编号 对应 条目名字
     db_map row;///属性 对应 属性类型
     db_map index;///具有索引的属性列 对应 索引名
@@ -77,8 +77,8 @@ struct table{
 
         unsigned keys[num];
         items.get_all_key(keys);
-        unsigned char tmp[32];
-        unsigned char nul[32]="";
+        unsigned char tmp[v_len];
+        unsigned char nul[v_len]="";
         for(int i=0;i<num;i++)
         {
             items.get_by_key(keys[i],tmp);
@@ -93,24 +93,30 @@ struct table{
 
     //void delete_row(unsigned char s[]){}
 
-    unsigned int add_item(){
+    unsigned int add_item(){//you wen ti?
         ///获取空编号
         unsigned int num;
         items_empty.get_by_index(0,&num);
         items_empty.pop_head();
         if(items_empty.size==0)items_empty.push_head(num+1);
         ///新建条目
-        char s[32],s_tem[32];
+        char s[k_len],s_tem[k_len];
         strcpy(s,name);
         strcat(s,"_");
         sprintf(s_tem, "%d", num);
         //itoa(num,s_tem,10);
         strcat(s,s_tem);
+    char sss[k_len]="test_1_l";
+    char sss2[k_len]="test_4_l";
+    printf("\na2TEST:%s is %d\n",sss,db->exists_map(sss));
         item item_tem(s);
-        unsigned char keys[r][32];
+    printf("a3TEST:%s is %d\n\n",sss,db->exists_map(sss));
+    printf("a3TEST:%s is %d\n\n",sss2,db->exists_map(sss2));
+    if(!db->exists_map(sss))exit(0);
+        unsigned char keys[r][k_len];
         row.get_all_key(keys);
         unsigned int type;
-        unsigned char nul[32]="";
+        unsigned char nul[v_len]="";
         for(int i=0;i<r;i++){
         	row.get_by_key(keys[i],&type);
         	if(type=='d'){
@@ -142,14 +148,14 @@ struct table{
         items_empty.pop_head();
         if(items_empty.size==0)items_empty.push_head(num+1);
         ///新建条目
-        char s[32],s_tem[32];
+        char s[k_len],s_tem[k_len];
         strcpy(s,name);
         strcat(s,"_");
         sprintf(s_tem, "%d", num);
         //itoa(num,s_tem,10);
         strcat(s,s_tem);
         item item_tem(s);
-        unsigned char keys[r][32];
+        unsigned char keys[r][k_len];
         row.get_all_key(keys);
         unsigned int type;
         for(int i=0;i<r;i++){
@@ -178,11 +184,17 @@ struct table{
     }
 
     item get_item(unsigned int i){
-        unsigned char s[32];
+        unsigned char s[v_len];
         if(!items.exists(i)){
         	printf("Error!\n");
         }
         items.get_by_key(i,s);
+        /*
+        char s1[k_len];
+        strcpy(s1,(char*)s);
+        strcat(s1,"_l");
+        printf("GET: %s is %d\n",s1,db->exists_map(s1));
+        */
         item item_tmp((char *)s);
         return item_tmp;
     }
@@ -193,10 +205,10 @@ struct table{
             return 0;
         }
         item item_tmp=get_item(i);
-        unsigned char keys[r][32];
+        unsigned char keys[r][k_len];
         row.get_all_key(keys);
         unsigned int type,in_i=0;
-        unsigned char in_s[32]="";
+        unsigned char in_s[v_len]="";
         for(int j=0;j<r;j++){
             row.get_by_key(keys[j],&type);
             if(type=='d'){
@@ -229,7 +241,7 @@ struct table{
     	va_list args;
     	va_start(args,len);
         item item_tmp=get_item(i);
-        unsigned char keys[r][32];
+        unsigned char keys[r][k_len];
         row.get_all_key(keys);
         unsigned int type;
         for(int j=0;j<len;j++){
@@ -273,7 +285,7 @@ struct table{
     		printf("Not exist row %s!\n",ss);
     		return 0;
     	}
-        unsigned char s[32],s2[32],s3[32];///索引名,临时串,临时list名
+        unsigned char s[v_len],s2[v_len],s3[v_len];///索引名,临时串,临时list名
         strcpy((char*)s,name);
         strcat((char*)s,(char*)ss);
         unsigned int type;
@@ -282,7 +294,7 @@ struct table{
             printf("Index for %s exsit. Now recreate.\n",(char*)ss);
             db_map map_tmp=db->get_map((char*)s);
             int num=map_tmp.get_size();
-            unsigned char all_keys[num][32];
+            unsigned char all_keys[num][k_len];
             map_tmp.get_all_key(all_keys);
             for(int i=0;i<num;i++){/////////////
             	memset(s3,0,sizeof(s3));
@@ -320,14 +332,22 @@ struct table{
                 }
             }
         }else{
-            unsigned char val[32];
+            unsigned char val[v_len];
             unsigned int keys_s[c];
             items.get_all_key(keys_s);
 			
             for(int j=0;j<c;j++){///
                 memset(s3,0,sizeof(s3));
+                
+                /*printf("2ATTENTION!%d\n",keys_s[j]);
+                char sss[k_len]="test_1_l";
+                printf("%s is %d\n",sss,db->exists_map(sss));
+                */
                 item item_tmp=get_item(keys_s[j]);
                 item_tmp.get_val(ss,val);
+                
+                //printf("22ATTENTION!\n");
+                
                 ///取val的所有子串
                 for(int k1=0;k1<strlen((char*)val);k1++){
                     for(int k2=k1;k2<strlen((char*)val);k2++){
@@ -368,11 +388,15 @@ struct table{
     	    printf("Row %s is type of string!\n",s);
     		return v;
     	}
-    	unsigned char ind[32];
+    	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
 
-    	unsigned char res[32];//读结果链表
+		if(!map_tmp.exists(val)){
+			printf("There is no item include val:  %d\n",val);
+			return v;
+		}
+    	unsigned char res[v_len];//读结果链表
     	map_tmp.get_by_key(val,res);
     	db_list list_tmp=db->get_list((char*)res);
 
@@ -398,14 +422,19 @@ struct table{
     	    printf("Row %s is type of unsigned int!\n",s);
     		return v;
     	}
-    	unsigned char ind[32];
+    	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
 
-    	unsigned char res[32];//读结果链表
+		if(!map_tmp.exists(val)){
+			printf("There is no item include val:  %s\n",val);
+			return v;
+		}
+    	unsigned char res[v_len];//读结果链表
     	map_tmp.get_by_key(val,res);
     	db_list list_tmp=db->get_list((char*)res);
-
+		//printf("%d\n",list_tmp.self.filenum);
+		
     	unsigned int keys[list_tmp.size];//塞进vector返回
     	list_tmp.get_all_value(keys);
     	for(int j=0;j<list_tmp.size;j++){
@@ -425,7 +454,25 @@ struct table{
     	db->delete_map(name_items);
     	db->delete_map(name_row);
 		//index
-
+		int num=index.get_size();
+		unsigned char all_indexs[num][k_len];
+		index.get_all_key(all_indexs);
+		
+		unsigned char s[v_len];
+		for(int i=0;i<num;i++){
+			index.get_by_key(all_indexs[i],s);
+			db_map map_tmp=db->get_map((char*)s);
+			
+			int num2=map_tmp.get_size();
+			unsigned char all_lists[num2][k_len];
+			index.get_all_key(all_lists);
+			
+			unsigned char s2[v_len];
+			for(int j=0;j<num2;j++){
+				map_tmp.get_by_key(all_lists[j],s2);
+				db->delete_list((char*)s2);
+			}
+		}
     	db->delete_map(name_index);
 
     	printf("table %s has been destroyed.\n",name);
@@ -435,16 +482,19 @@ struct table{
     	printf("\n%s: \n",name);
     
         int num=items.get_size();
-        unsigned char keys[num][32];
-        unsigned char keys_i[r][32];
-        unsigned char val[32],val_i[32];
+        unsigned int keys[num];
+        unsigned char keys_i[r][k_len];
+        unsigned char val[v_len],val_i[v_len];
         unsigned int val_ii,type;
         items.get_all_key(keys);
         row.get_all_key(keys_i);
+        
+        printf("No. ");
         for(int i=0;i<r;i++)
             printf("%7s ",keys_i[i]);
         printf("\n");
         for(int i=0;i<num;i++){
+        	printf("%3d",keys[i]);
             items.get_by_key(keys[i],val);
             item item_tmp((char*)val);
             for(int j=0;j<r;j++){

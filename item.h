@@ -7,16 +7,26 @@
 #include <stdlib.h>
 
 struct item{
-    char nam[32];
+    char nam[k_len];
 	db_map l;///本体, 列名 对应 值；
 	db_struct *db;
-
+	
+	
+	item(){
+        db_struct *_db=new db_struct(1);
+        db=_db;
+		strcpy(nam,"NUL");
+		if(!db->exists_map("NUL"))db->create_map("NUL",'d','d');
+		l=db->get_map("NUL");
+	}
+	
 	item(const char name0[]){///new
         db_struct *_db=new db_struct(1);
         db=_db;
-        char s1[32];
+        char s1[k_len];
         strcpy(s1,name0);
         strcat(s1,"_l");
+    char sss[k_len]="test_1_l";
 		if(db->exists_map(s1)){
 			//printf("loading item %s ...\n",name0);
 			l=db->get_map(s1);
@@ -29,11 +39,18 @@ struct item{
 			//printf("%s\n",l.name);
 		}
 		strcpy(nam,name0);
+    //printf("bbbb3TEST:%s is %d\n\n",sss,db->exists_map(sss));
+	}
+	
+	item(const item & I){
+		l=I.l;
+		strcpy(nam,I.nam);
+		db=I.db;
 	}
 
     bool add_val(unsigned char k[],unsigned n){
         if(l.exists(k)){
-            printf("Val exist key!\n");
+            printf("add: Val exist key!\n");
             return 0;
         }
         l.add(k,n);
@@ -41,7 +58,7 @@ struct item{
     }
     bool add_val(unsigned char k[],unsigned char s[]){
         if(l.exists(k)){
-            printf("Val exist key!\n");
+            printf("add: Val exist key!\n");
             return 0;
         }
         l.add(k,s);
@@ -50,7 +67,7 @@ struct item{
 
     bool delete_val(unsigned char k[]){
         if(!l.exists(k)){
-            printf("Not exist key!\n");
+            printf("del: Not exist key!\n");
             return 0;
         }
         l.drop(k);
@@ -59,7 +76,7 @@ struct item{
 
 	bool modify_val(unsigned char k[],unsigned i){
         if(!l.exists(k)){
-            printf("Not exist key!\n");
+            printf("mod: Not exist key!\n");
             return 0;
         }
 		else {
@@ -69,7 +86,7 @@ struct item{
 	}
 	bool modify_val(unsigned char k[],unsigned char s[]){
         if(!l.exists(k)){
-            printf("Not exist key!\n");
+            printf("mod: Not exist key!\n");
             return 0;
         }
 		else {
@@ -80,7 +97,7 @@ struct item{
 
 	bool get_val(unsigned char k[],unsigned int *i){
         if(!l.exists(k)){
-            printf("Not exist key!\n");
+            printf("get: Not exist key!\n");
             return 0;
         }
 		else {
@@ -90,7 +107,7 @@ struct item{
 	}
 	bool get_val(unsigned char k[],unsigned char s[]){
         if(!l.exists(k)){
-            printf("Not exist key!\n");
+            printf("get: Not exist key!\n");
             return 0;
         }
 		else {
@@ -101,13 +118,13 @@ struct item{
 
     void clear_all(){
         int num=l.get_size();
-        unsigned char s[num][32];
+        unsigned char s[num][k_len];
         l.get_all_key(s);
         for(int i=0;i<num;i++)
             l.drop(s[i]);
     }
     void delete_all(){
-        char s[32];
+        char s[k_len];
         memset(s,0,sizeof(s));
         strcpy(s,nam);
         strcat(s,"_l");
