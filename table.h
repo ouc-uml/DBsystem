@@ -3,31 +3,31 @@
 #include <vector>
 #include "item.h"
 
-/*Ë÷ÒıÔÚĞŞ¸ÄÖµÊ±ĞŞ¸Ä*/
+/*ç´¢å¼•åœ¨ä¿®æ”¹å€¼æ—¶ä¿®æ”¹*/
 
 struct table{
     char name[k_len];
     char name_items[k_len];
     char name_items_empty[k_len];
-    char name_row[k_len];
+    char name_column[k_len];
     char name_index[k_len];
-    db_map items;///ÌõÄ¿±àºÅ ¶ÔÓ¦ ÌõÄ¿Ãû×Ö
-    db_map row;///ÊôĞÔ ¶ÔÓ¦ ÊôĞÔÀàĞÍ
-    db_map index;///¾ßÓĞË÷ÒıµÄÊôĞÔÁĞ ¶ÔÓ¦ Ë÷ÒıÃû
-    db_list items_empty;///Ôİ¿ÕÌõÄ¿±àºÅÁĞ
+    db_map items;///æ¡ç›®ç¼–å· å¯¹åº” æ¡ç›®åå­—
+    db_map column;///å±æ€§ å¯¹åº” å±æ€§ç±»å‹
+    db_map index;///å…·æœ‰ç´¢å¼•çš„å±æ€§åˆ— å¯¹åº” ç´¢å¼•å
+    db_list items_empty;///æš‚ç©ºæ¡ç›®ç¼–å·åˆ—
     db_struct *db;
-    int c,r;///ÌõÄ¿ÊıÓëÁĞÊı
+    int c,r;///åˆ—æ•°ä¸æ¡ç›®æ•°!
 
-    table(const char s[]){///½¨Á¢¿Õ±í£¬ÈôÒÑ´æÔÚÔò¶ÁÈë
+    table(const char s[]){///å»ºç«‹ç©ºè¡¨ï¼Œè‹¥å·²å­˜åœ¨åˆ™è¯»å…¥
         strcpy(name,s);
         strcpy(name_items,s);
         strcpy(name_items_empty,s);
-        strcpy(name_row,s);
+        strcpy(name_column,s);
         strcpy(name_index,s);
 
         strcat(name_items,"_items");
         strcat(name_items_empty,"_items_empty");
-        strcat(name_row,"_row");
+        strcat(name_column,"_column");
         strcat(name_index,"_index");
         db_struct *_db=new db_struct(1);
         db=_db;
@@ -36,7 +36,7 @@ struct table{
         	printf("loading now...\n");
             items=db->get_map(name_items);
             items_empty=db->get_list(name_items_empty);
-            row=db->get_map(name_row);
+            column=db->get_map(name_column);
 
 				/*
                 unsigned tmp[items_empty.size];
@@ -46,15 +46,15 @@ struct table{
                 printf("\n");*/
 
             index=db->get_map(name_index);
-            c=items.get_size();//-items_empty.size;
-            r=row.get_size();
+            r=items.get_size();//-items_empty.size;
+            c=column.get_size();
             ///load index
         }
         else{
             printf("creating now...\n");
             items=db->create_map(name_items,'d','s');
             items_empty=db->create_list(name_items_empty,'d');
-            row=db->create_map(name_row,'s','d');
+            column=db->create_map(name_column,'s','d');
             index=db->create_map(name_index,'s','s');
             items_empty.push_tail(1);
             c=0;r=0;
@@ -62,15 +62,15 @@ struct table{
         }
     }
 
-   bool add_row(unsigned char s[],char type){///Ìí¼ÓÃûÎªsµÄintÁĞ¡£ÖµÎª¿Õ
-        if(row.exists(s))
+   bool add_column(unsigned char s[],char type){///æ·»åŠ åä¸ºsçš„intåˆ—ã€‚å€¼ä¸ºç©º
+        if(column.exists(s))
         {
-            printf("Row %s exist!\n",(char*)s);
+            printf("column %s exist!\n",(char*)s);
             return 0;
         }
-        r++;
-        row.add(s,(unsigned int)type);
-        printf("Row %s add done!\n",(char*)s);
+        c++;
+        column.add(s,(unsigned int)type);
+        printf("column %s add done!\n",(char*)s);
 
         int num=items.get_size();
         if(num==0)return 1;
@@ -91,34 +91,29 @@ struct table{
         return 1;
     }
 
-    //void delete_row(unsigned char s[]){}
+    //void delete_column(unsigned char s[]){}
 
-    unsigned int add_item(){//you wen ti?
-        ///»ñÈ¡¿Õ±àºÅ
+    unsigned int add_item(){
+        ///è·å–ç©ºç¼–å·
         unsigned int num;
         items_empty.get_by_index(0,&num);
         items_empty.pop_head();
         if(items_empty.size==0)items_empty.push_head(num+1);
-        ///ĞÂ½¨ÌõÄ¿
+        ///æ–°å»ºæ¡ç›®
         char s[k_len],s_tem[k_len];
         strcpy(s,name);
         strcat(s,"_");
         sprintf(s_tem, "%d", num);
         //itoa(num,s_tem,10);
         strcat(s,s_tem);
-    char sss[k_len]="test_1_l";
-    char sss2[k_len]="test_4_l";
-    printf("\na2TEST:%s is %d\n",sss,db->exists_map(sss));
         item item_tem(s);
-    printf("a3TEST:%s is %d\n\n",sss,db->exists_map(sss));
-    printf("a3TEST:%s is %d\n\n",sss2,db->exists_map(sss2));
-    if(!db->exists_map(sss))exit(0);
-        unsigned char keys[r][k_len];
-        row.get_all_key(keys);
+    	//if(!db->exists_map(sss))exit(0);
+        unsigned char keys[c][k_len];
+        column.get_all_key(keys);
         unsigned int type;
         unsigned char nul[v_len]="";
-        for(int i=0;i<r;i++){
-        	row.get_by_key(keys[i],&type);
+        for(int i=0;i<c;i++){
+        	column.get_by_key(keys[i],&type);
         	if(type=='d'){
         		item_tem.add_val(keys[i],(unsigned int)0);
         	}
@@ -131,23 +126,23 @@ struct table{
         	printf("Item %d add done.\n",num);
         }
 
-        c++;
+        r++;
         return num;
     }
     
     unsigned int add_item(unsigned int len,...){
-        if(len>r){
-            printf("There only %d rows in the table!\n",r);
+        if(len>c){
+            printf("There only %d columns in the table!\n",c);
             return 0;
         }
       	va_list args;
     	va_start(args,len);
-        ///»ñÈ¡¿Õ±àºÅ
+        ///è·å–ç©ºç¼–å·
         unsigned int num;
         items_empty.get_by_index(0,&num);
         items_empty.pop_head();
         if(items_empty.size==0)items_empty.push_head(num+1);
-        ///ĞÂ½¨ÌõÄ¿
+        ///æ–°å»ºæ¡ç›®
         char s[k_len],s_tem[k_len];
         strcpy(s,name);
         strcat(s,"_");
@@ -155,11 +150,11 @@ struct table{
         //itoa(num,s_tem,10);
         strcat(s,s_tem);
         item item_tem(s);
-        unsigned char keys[r][k_len];
-        row.get_all_key(keys);
+        unsigned char keys[c][k_len];
+        column.get_all_key(keys);
         unsigned int type;
-        for(int i=0;i<r;i++){
-        	row.get_by_key(keys[i],&type);
+        for(int i=0;i<c;i++){
+        	column.get_by_key(keys[i],&type);
         	if(type=='d'){
         		unsigned int in_i=va_arg(args,unsigned int);
         		item_tem.add_val(keys[i],in_i);
@@ -174,13 +169,26 @@ struct table{
         	printf("Item %d add done.\n",num);
         }
 
-        c++;
+        r++;
         return num;
     }
 
     int get_all_no(unsigned int i[]){
 		items.get_all_key(i);
+		return r;
+    }    
+    int get_all_column(unsigned char i[][k_len]){
+		column.get_all_key(i);
 		return c;
+    }
+    char get_type(unsigned char i[]){
+    	if(!column.exists(i)){
+    		printf("There is no column '%s' !\n",i);
+    		return 'd';
+    	}
+    	unsigned int ch;	
+    	column.get_by_key(i,&ch);
+    	return ch;
     }
 
     item get_item(unsigned int i){
@@ -205,21 +213,21 @@ struct table{
             return 0;
         }
         item item_tmp=get_item(i);
-        unsigned char keys[r][k_len];
-        row.get_all_key(keys);
+        unsigned char keys[c][k_len];
+        column.get_all_key(keys);
         unsigned int type,in_i=0;
         unsigned char in_s[v_len]="";
-        for(int j=0;j<r;j++){
-            row.get_by_key(keys[j],&type);
+        for(int j=0;j<c;j++){
+            column.get_by_key(keys[j],&type);
             if(type=='d'){
             	item_tmp.get_val(keys[j],&in_i);
-                printf("Now: %d\nNew for item %d, row %s: ",in_i,i,keys[j]);
+                printf("Now: %d\nNew for item %d, column %s: ",in_i,i,keys[j]);
                 scanf("%d",&in_i);
                 item_tmp.modify_val(keys[j],in_i);///int
             }
             else{
             	item_tmp.get_val(keys[j],in_s);
-                printf("Now: %s\nNew for item %d, row %s: ",in_s,i,keys[j]);
+                printf("Now: %s\nNew for item %d, column %s: ",in_s,i,keys[j]);
                 scanf("%s",in_s);
                 item_tmp.modify_val(keys[j],in_s);///string
             }
@@ -234,18 +242,18 @@ struct table{
             printf("Item %d doesn't exist!\n",i);
             return 0;
         }
-        if(len>r){
-            printf("There only %d rows in the table!\n",r);
+        if(len>c){
+            printf("There only %d columns in the table!\n",c);
             return 0;
         }
     	va_list args;
     	va_start(args,len);
         item item_tmp=get_item(i);
-        unsigned char keys[r][k_len];
-        row.get_all_key(keys);
+        unsigned char keys[c][k_len];
+        column.get_all_key(keys);
         unsigned int type;
         for(int j=0;j<len;j++){
-            row.get_by_key(keys[j],&type);
+            column.get_by_key(keys[j],&type);
             if(type=='d'){
             	unsigned in_i=va_arg(args,unsigned int);
                 item_tmp.modify_val(keys[j],in_i);///int
@@ -266,7 +274,7 @@ struct table{
         }
 
         items_empty.push_head(i);
-       	c--;
+       	r--;
 
         item item_tmp=get_item(i);
         item_tmp.clear_all();
@@ -280,16 +288,16 @@ struct table{
     }
 
     bool set_index(unsigned char ss[]){
-    //ÎªÃûÎªssµÄÁĞ½¨Á¢Ë÷Òı£»
-    	if(!row.exists(ss)){
-    		printf("Not exist row %s!\n",ss);
+    //ä¸ºåä¸ºssçš„åˆ—å»ºç«‹ç´¢å¼•ï¼›
+    	if(!column.exists(ss)){
+    		printf("Not exist column %s!\n",ss);
     		return 0;
     	}
-        unsigned char s[v_len],s2[v_len],s3[v_len];///Ë÷ÒıÃû,ÁÙÊ±´®,ÁÙÊ±listÃû
+        unsigned char s[v_len],s2[v_len],s3[v_len];///ç´¢å¼•å,ä¸´æ—¶ä¸²,ä¸´æ—¶listå
         strcpy((char*)s,name);
         strcat((char*)s,(char*)ss);
         unsigned int type;
-        row.get_by_key(ss,&type);
+        column.get_by_key(ss,&type);
         if(index.exists(ss)){
             printf("Index for %s exsit. Now recreate.\n",(char*)ss);
             db_map map_tmp=db->get_map((char*)s);
@@ -303,14 +311,14 @@ struct table{
             }
         	db->delete_map((char*)s);
         }
-        db_map map_tmp=db->create_map((char*)s,type,'s');///ĞÂË÷Òı
+        db_map map_tmp=db->create_map((char*)s,type,'s');///æ–°ç´¢å¼•
         if(!index.exists(ss))index.add(ss,s);
 
         if(type=='d'){
-            unsigned int keys[c],val;
+            unsigned int keys[r],val;
             items.get_all_key(keys);
 
-            for(int j=0;j<c;j++){
+            for(int j=0;j<r;j++){
                 memset(s3,0,sizeof(s3));
                 item item_tmp=get_item(keys[j]);
                 item_tmp.get_val(ss,&val);
@@ -321,7 +329,7 @@ struct table{
                     list_tmp.push_tail(keys[j]);
                 }
                 else{
-                    ///±íÃû+ÁĞÃû+¼ü
+                    ///è¡¨å+åˆ—å+é”®
                     strcpy((char*)s3,(char*)s);
                     sprintf((char*)s2,"%d",val);
                     //itoa(val,(char*)s2,10);
@@ -333,22 +341,16 @@ struct table{
             }
         }else{
             unsigned char val[v_len];
-            unsigned int keys_s[c];
+            unsigned int keys_s[r];
             items.get_all_key(keys_s);
 			
-            for(int j=0;j<c;j++){///
+            for(int j=0;j<r;j++){///
                 memset(s3,0,sizeof(s3));
                 
-                /*printf("2ATTENTION!%d\n",keys_s[j]);
-                char sss[k_len]="test_1_l";
-                printf("%s is %d\n",sss,db->exists_map(sss));
-                */
                 item item_tmp=get_item(keys_s[j]);
                 item_tmp.get_val(ss,val);
                 
-                //printf("22ATTENTION!\n");
-                
-                ///È¡valµÄËùÓĞ×Ó´®
+                ///å–valçš„æ‰€æœ‰å­ä¸²
                 for(int k1=0;k1<strlen((char*)val);k1++){
                     for(int k2=k1;k2<strlen((char*)val);k2++){
                         memset(s2,0,sizeof(s2));
@@ -375,32 +377,32 @@ struct table{
     }
 
     vector<unsigned int> find_by_index(unsigned char s[],unsigned int val){
-    //ÔÚÃûÎªsµÄÁĞÉÏËÑË÷ÖµÎªval(ÎŞ·ûºÅÕûĞÍ)µÄÌõÄ¿£¬·µ»ØÂú×ãÌõ¼şµÄitemµÄ±àºÅµÄvector£»
+    //åœ¨åä¸ºsçš„åˆ—ä¸Šæœç´¢å€¼ä¸ºval(æ— ç¬¦å·æ•´å‹)çš„æ¡ç›®ï¼Œè¿”å›æ»¡è¶³æ¡ä»¶çš„itemçš„ç¼–å·çš„vectorï¼›
     	vector<unsigned int> v;
     	if(!index.exists(s)){
     	    printf("Index for %s doesn't exsit!\n",s);
     		return  v;
     	}
-    	//Ğ£ÑéÀàĞÍ
+    	//æ ¡éªŒç±»å‹
     	unsigned int type;
-    	row.get_by_key(s,&type);
+    	column.get_by_key(s,&type);
     	if(type=='s'){
-    	    printf("Row %s is type of string!\n",s);
+    	    printf("column %s is type of string!\n",s);
     		return v;
     	}
     	unsigned char ind[v_len];
-    	index.get_by_key(s,ind);//¶Á¸ÃÁĞË÷Òı
+    	index.get_by_key(s,ind);//è¯»è¯¥åˆ—ç´¢å¼•
     	db_map map_tmp=db->get_map((char*)ind);
 
 		if(!map_tmp.exists(val)){
 			printf("There is no item include val:  %d\n",val);
 			return v;
 		}
-    	unsigned char res[v_len];//¶Á½á¹ûÁ´±í
+    	unsigned char res[v_len];//è¯»ç»“æœé“¾è¡¨
     	map_tmp.get_by_key(val,res);
     	db_list list_tmp=db->get_list((char*)res);
 
-    	unsigned int keys[list_tmp.size];//Èû½øvector·µ»Ø
+    	unsigned int keys[list_tmp.size];//å¡è¿›vectorè¿”å›
     	list_tmp.get_all_value(keys);
     	for(int j=0;j<list_tmp.size;j++){
     		v.push_back(keys[j]);
@@ -409,33 +411,33 @@ struct table{
     }
 
     vector<unsigned int> find_by_index(unsigned char s[],unsigned char val[]){
-    //ÔÚÃûÎªsµÄÁĞÉÏËÑË÷Öµ°üº¬val(string)µÄÌõÄ¿£¬·µ»ØÂú×ãÌõ¼şµÄitemµÄ±àºÅµÄvector£»
+    //åœ¨åä¸ºsçš„åˆ—ä¸Šæœç´¢å€¼åŒ…å«val(string)çš„æ¡ç›®ï¼Œè¿”å›æ»¡è¶³æ¡ä»¶çš„itemçš„ç¼–å·çš„vectorï¼›
         vector<unsigned int> v;
     	if(!index.exists(s)){
     	    printf("Index for %s doesn't exsit!\n",s);
     		return  v;
     	}
-    	//Ğ£ÑéÀàĞÍ
+    	//æ ¡éªŒç±»å‹
     	unsigned int type;
-    	row.get_by_key(s,&type);
+    	column.get_by_key(s,&type);
     	if(type=='d'){
-    	    printf("Row %s is type of unsigned int!\n",s);
+    	    printf("column %s is type of unsigned int!\n",s);
     		return v;
     	}
     	unsigned char ind[v_len];
-    	index.get_by_key(s,ind);//¶Á¸ÃÁĞË÷Òı
+    	index.get_by_key(s,ind);//è¯»è¯¥åˆ—ç´¢å¼•
     	db_map map_tmp=db->get_map((char*)ind);
 
 		if(!map_tmp.exists(val)){
 			printf("There is no item include val:  %s\n",val);
 			return v;
 		}
-    	unsigned char res[v_len];//¶Á½á¹ûÁ´±í
+    	unsigned char res[v_len];//è¯»ç»“æœé“¾è¡¨
     	map_tmp.get_by_key(val,res);
     	db_list list_tmp=db->get_list((char*)res);
 		//printf("%d\n",list_tmp.self.filenum);
 		
-    	unsigned int keys[list_tmp.size];//Èû½øvector·µ»Ø
+    	unsigned int keys[list_tmp.size];//å¡è¿›vectorè¿”å›
     	list_tmp.get_all_value(keys);
     	for(int j=0;j<list_tmp.size;j++){
     		v.push_back(keys[j]);
@@ -445,14 +447,14 @@ struct table{
 
 
     void delete_talbe(){
-    	unsigned int keys[c];
+    	unsigned int keys[r];
     	items.get_all_key(keys);
-    	for(int i=0;i<c;i++){
+    	for(int i=0;i<r;i++){
     		delete_item(keys[i]);
     	}
     	db->delete_list(name_items_empty);
     	db->delete_map(name_items);
-    	db->delete_map(name_row);
+    	db->delete_map(name_column);
 		//index
 		int num=index.get_size();
 		unsigned char all_indexs[num][k_len];
@@ -483,22 +485,22 @@ struct table{
     
         int num=items.get_size();
         unsigned int keys[num];
-        unsigned char keys_i[r][k_len];
+        unsigned char keys_i[c][k_len];
         unsigned char val[v_len],val_i[v_len];
         unsigned int val_ii,type;
         items.get_all_key(keys);
-        row.get_all_key(keys_i);
+        column.get_all_key(keys_i);
         
         printf("No. ");
-        for(int i=0;i<r;i++)
+        for(int i=0;i<c;i++)
             printf("%7s ",keys_i[i]);
         printf("\n");
         for(int i=0;i<num;i++){
         	printf("%3d",keys[i]);
             items.get_by_key(keys[i],val);
             item item_tmp((char*)val);
-            for(int j=0;j<r;j++){
-                row.get_by_key(keys_i[j],&type);
+            for(int j=0;j<c;j++){
+                column.get_by_key(keys_i[j],&type);
                 if(type=='d'){
                     item_tmp.l.get_by_key(keys_i[j],&val_ii);
                     printf("%7d ",val_ii);
@@ -519,3 +521,4 @@ struct table{
 
 
 #endif // TABLE_H_INCLUDED
+

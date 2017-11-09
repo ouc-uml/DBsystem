@@ -26,7 +26,6 @@ struct item{
         char s1[k_len];
         strcpy(s1,name0);
         strcat(s1,"_l");
-    char sss[k_len]="test_1_l";
 		if(db->exists_map(s1)){
 			//printf("loading item %s ...\n",name0);
 			l=db->get_map(s1);
@@ -39,7 +38,6 @@ struct item{
 			//printf("%s\n",l.name);
 		}
 		strcpy(nam,name0);
-    //printf("bbbb3TEST:%s is %d\n\n",sss,db->exists_map(sss));
 	}
 	
 	item(const item & I){

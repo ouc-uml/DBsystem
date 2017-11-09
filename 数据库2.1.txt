@@ -1,4 +1,5 @@
 这一层提供两个数据结构：条目和表，实现了在外存上的基本的数据库操作；
+与一个数据库管理工具，暂为雏形。
 
 
 条目（item）类
@@ -61,7 +62,7 @@ table(unsigned char name[])
 ///新建一个名字为name的空表，！！！名字唯一标识一个表。若已存在则直接返回该表；
 
 
-void add_row(unsigned char s[]，char type)
+void add_column(unsigned char s[]，char type)
 //为所有条目在末尾添加名为s的新列，值为空；
 //type为'd'添加unsigned int型，否则添加字符串；
 
@@ -74,6 +75,10 @@ unsigned int add_item(unsigned int len,...)
 
 int get_all_no(unsigned int i[])
 //获取所有条目编号至数组 i 中，返回条目个数;
+int get_all_column(unsigned char i[][k_len])
+//获取所有属性名至i中,返回个数;
+char get_type(unsigned char i[])
+//返回属性i的类型，若i不存在返回'd';
 item get_item(unsigned int i)
 //获取编号为i的条目,注意！不检查是否存在！！
 
@@ -104,8 +109,8 @@ table名
 table名+"_items"
 table名+"_items_index"
 table名+"_items_empty"
-table名+"_row"
-table名+"_row_type"
+table名+"_column"
+table名+"_column_type"
 table名+"_index"
 table名+列名
 table名+列名+列值
