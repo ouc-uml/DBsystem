@@ -112,10 +112,11 @@ ___
 	+ 属性编号即为添加顺序；
 	+ 成功返回1；
 
-+ `bool add_column(unsigned char s[]，char type)`
++ `bool add_column(unsigned char s[]，char type，unsigned char ini[])`
 
 	+ 为所有元组在末尾添加名为s的新列；
-	+ type为'd'添加unsigned int型，值为0，否则添加字符串，值为ini[]；
+	+ type为'd'添加unsigned int型，值为0，否则添加字符串，值为ini[]；	
+	+ 属性编号即为添加顺序；
 	+ 成功返回1；
 
 + `unsigned int add_item()`
@@ -183,7 +184,7 @@ ___
 	+ 直接编辑第 i 条元组（键入）；
 	+ 成功返回1；
 
-+ `bool edit_item(unsigned int i,unsigned int len,...)`//!!
++ `bool edit_item(unsigned int i,unsigned int len,...)`
 
 	+ 直接编辑第 i 条元组的前len个元组（参数输入）；
 	+ 成功返回1；
