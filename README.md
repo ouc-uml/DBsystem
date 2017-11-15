@@ -21,11 +21,12 @@
 
 同时维护该表上的索引；
 
-+ 表中含3个map，1个list；
++ 表中含4个map，1个list；
 
 	+ map_items为主体部分，存放 元组编号——元组名字 关系；
 	+ map_index为索引链接，存放 具有索引的属性列——索引的名字；
-	+ map_column为属性备忘，存放 属性名——属性类型（无符号整型或字符串）；
+	+ map__column为属性备忘1，存放 属性编号——属性名；
+	+ map_column为属性备忘2，存放 属性名——属性类型（无符号整型或字符串）；
 	+ list_empty为删除链，存放暂时被删除而空置的编号，用于提供下一个插入元组的编号。
 
 + 每个索引中包含一个map，值指向的元组编号则由一个list存放。即每个索引对应一个map与若干个list。
@@ -102,21 +103,21 @@ ___
 
 	+ 为所有元组在末尾添加名为s的新列；
 	+ type为'd'添加unsigned int型，值为0，否则添加字符串，值为空；
-	+ 属性编号即为添加顺序；
+	+ 属性编号按添加顺序递增；
 	+ 成功返回1；
 
 + `bool add_column(unsigned char s[]，char type，unsigned int ini)`
 
 	+ 为所有元组在末尾添加名为s的新列；
 	+ type为'd'添加unsigned int型，值为 ini，否则添加字符串，值为空；	
-	+ 属性编号即为添加顺序；
+	+ 属性编号按添加顺序递增；
 	+ 成功返回1；
 
 + `bool add_column(unsigned char s[]，char type，unsigned char ini[])`
 
 	+ 为所有元组在末尾添加名为s的新列；
 	+ type为'd'添加unsigned int型，值为0，否则添加字符串，值为ini[]；	
-	+ 属性编号即为添加顺序；
+	+ 属性编号按添加顺序递增；
 	+ 成功返回1；
 
 + `unsigned int add_item()`
@@ -184,23 +185,29 @@ ___
 	+ 直接编辑第 i 条元组（键入）；
 	+ 成功返回1；
 
-+ `bool edit_item(unsigned int i,unsigned int len,...)`
++ `bool edit_item(unsigned int i,unsigned int ii,unsigned int len,...)`
 
-	+ 直接编辑第 i 条元组的前len个元组（参数输入）；
+	+ 直接编辑第 i 条元组从第 ii 个属性开始的len个元组（参数输入）；
 	+ 成功返回1；
 
 + `bool edit_item(unsigned int i,unsigned int ii,vector<string> v)`
 
-	+ 直接编辑第 i 条元组从 ii 个属性开始的若干个元组；
-	+ 成功返回1；
+	+ 直接编辑第 i 条元组从第 ii 个属性开始的若干个元组；
+	+ 成功返回 1 ；
 
 + `bool delete_item(unsigned int i)`
 
-	+删除编号为 i 的元组；
+	+ 删除编号为 i 的元组；
 
++ `bool delete_column(unsigned char s[])`
+
+	+ 删除名为 s 的属性列及其索引(存在的话);
+	+ 后面的属性列编号全部减 1 ;
+	+ 成功返回 1 ;
+	
 + `void delete_talbe()`
 
-	+删除该表及表上所有元组，所有索引；
+	+ 删除该表及表上所有元组，所有索引；
 
 + `void show_all()`
 	
@@ -216,6 +223,5 @@ ___
 + table名+"_index"
 + table名+列名
 + table名+列名+列值
-
-+ item名
-+ item名+“_l”
++ table名+"_items"+编号
++ table名+"_items"+编号+“_l”
