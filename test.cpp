@@ -17,13 +17,16 @@ int main(){
     //*
     
     table t(s);
-    t.add_column(s1,'s',"www");
-    t.add_column(s2,'d',777);
+    t.add_column(s2,'s',"www");
+    t.add_column(s4,'d',777);
     t.add_column(s3,'s');
     t.add_column(s3,'s');
-    t.add_column(s4,'s');
+    t.add_column(s1,'s');
+    t.add_item();
+    t.add_item();
     t.add_item();
     t.add_item(2,"faqwff",33);
+    t.show_all();
     //*
     vector<string> v;
     string s_add="qqqqq";
@@ -34,25 +37,25 @@ int main(){
     v.push_back(s_add);//*/
     t.add_item(v);
     
-    t.edit_item(1,2,"qwe",1);
-    t.edit_item(4,2,"qwer",2);
+    t.edit_item(1,1,2,"qwe",1);
+    t.edit_item(4,1,2,"qwer",2);
     t.edit_item(3,1,v);
-    //t.delete_item(2);
+    t.show_all();
+    //t.delete_column(s2);
+    vector<unsigned int> v_i={1,2,4,5};
+    t.edit_items(s4,v_i,721);
+    t.show_all();
     
-    vector<string> v_s=t.get_column_s(s1);
-    vector<unsigned int> v_i=t.get_column_i(s2);
-    printf("%7s %7s\n",s1,s2);
-    for(int i=0;i<v_i.size();i++){
-    	printf("%7s %7d\n",v_s[i].c_str(),v_i[i]);
-    }
+    //vector<string> v_s=t.get_column_s(s1);
+    //vector<unsigned int> v_i=t.get_column_i(s2);
     
-    /*
-    t.set_index(s1);
+    //*
+    //t.set_index(s2);
     unsigned char qw[32]="qw";
-    vector<unsigned int> v= t.find_by_index(s1,qw);
+    vector<unsigned int> vv= t.find_from_all(s2,qw);
     printf("No. which values qw: ");
-    for(int i=0;i<v.size();i++){
-    	cout<<v[i]<<"  ";
+    for(int i=0;i<vv.size();i++){
+    	cout<<vv[i]<<"  ";
     }
     cout<<endl;
     /*

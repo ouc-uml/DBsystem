@@ -31,8 +31,7 @@ struct item{
 			//printf("loading item %s ...\n",name0);
 			l=db->get_map(s1);
 			//printf("Item %s load done.\n",name0);
-		}
-		else{
+		} else{
 			printf("creating item %s ...\n",name0);
 			l=db->create_map(s1,'s','s');
 			printf("Item %s create done.\n",name0);
@@ -71,8 +70,7 @@ struct item{
         if(!l.exists(k)){
             printf("get: Not exist key!\n");
             return 0;
-        }
-		else {
+        } else {
 			l.get_by_key(k, i);
 		}
 		return 1;
@@ -82,8 +80,7 @@ struct item{
         if(!l.exists(k)){
             printf("get: Not exist key!\n");
             return 0;
-        }
-		else {
+        } else {
 			l.get_by_key(k, s);
 		}
 		return 1;
@@ -94,8 +91,7 @@ struct item{
         if(!l.exists(k)){
             printf("mod: Not exist key!\n");
             return 0;
-        }
-		else {
+        } else {
             l.update(k,i);
 		}
         return 1;
@@ -105,8 +101,7 @@ struct item{
         if(!l.exists(k)){
             printf("mod: Not exist key!\n");
             return 0;
-        }
-		else {
+        } else {
             l.update(k,s);
         }
         return 1;
