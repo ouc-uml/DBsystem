@@ -198,8 +198,10 @@ struct table{
         	column.get_by_key(keys[i],&type);
         	if(type=='d'){
         		item_tem.add_val(keys[i],(unsigned int)0);
+        		update_index(keys[i],num,(unsigned int)0,(unsigned int)0,1);
         	} else {
         		item_tem.add_val(keys[i],nul);
+        		update_index(keys[i],num,nul,nul,1);
         	}
         }
 
@@ -241,20 +243,24 @@ struct table{
         for(int i=0;i<c;i++){
         	_column.get_by_key((unsigned)(i+1),keys[i]);
         	column.get_by_key(keys[i],&type);
-        	if(i<len_2){
+        	if(i<len_2){//有输入
 		    	if(type=='d'){
 		    		unsigned int in_i=va_arg(args,unsigned int);
 		    		item_tem.add_val(keys[i],in_i);
+        			update_index(keys[i],num,(unsigned int)0,in_i,1);
 		    	} else {
 		    		unsigned char* in_s=va_arg(args,unsigned char*);
 		    		item_tem.add_val(keys[i],in_s);
+        			update_index(keys[i],num,in_s,in_s,1);
 		    	}
-        	} else {
-        		if(type=='d')
+        	} else {//没输入
+        		if(type=='d'){
 		    		item_tem.add_val(keys[i],(unsigned)0);
-		    	else{
+        			update_index(keys[i],num,(unsigned int)0,(unsigned int)0,1);
+        		} else {
         			unsigned char nul[v_len]="";
 		    		item_tem.add_val(keys[i],nul);
+        			update_index(keys[i],num,nul,nul,1);
 		    	}
         	}
         }
@@ -301,19 +307,23 @@ struct table{
 		    			in_i+=(s_tmp[j]-'0');
 		    		}
 		    		item_tem.add_val(keys[i],in_i);
+        			update_index(keys[i],num,in_i,in_i,1);
 		    	} else {
 		    		unsigned char s_tmp[v_len];
 		    		const char* s_tem=v[i].c_str();
 		    		strcpy((char*)s_tmp,s_tem);
 		    		item_tem.add_val(keys[i],s_tmp);
+        			update_index(keys[i],num,s_tmp,s_tmp,1);
 		    	}
         	} else {
         		if(type=='d'){
 		    		unsigned int in_i=0;
 		    		item_tem.add_val(keys[i],in_i);
+        			update_index(keys[i],num,in_i,in_i,1);
         		} else {
 		    		unsigned char in_s[v_len]="";
 		    		item_tem.add_val(keys[i],in_s);
+        			update_index(keys[i],num,in_s,in_s,1);
         		}
         	}
         }
@@ -453,7 +463,9 @@ struct table{
         unsigned int type;
         column.get_by_key(ss,&type);
         if(index.exists(ss)){
-            printf("Index for %s exsit. Now recreate.\n",(char*)ss);
+            printf("Index for %s exsit!\n",(char*)ss);
+            return 0;
+            /*重建
             db_map map_tmp=db->get_map((char*)s);
             int num=map_tmp.get_size();
             unsigned char all_keys[num][k_len];
@@ -465,6 +477,7 @@ struct table{
             	db->delete_list((char*)s3);
             }
         	db->delete_map((char*)s);
+        	*/
         }
         db_map map_tmp=db->create_map((char*)s,type,'s');///新索引
         if(!index.exists(ss))index.add(ss,s);
@@ -488,6 +501,7 @@ struct table{
                     sprintf((char*)s2,"%d",val);
                     //itoa(val,(char*)s2,10);
                     strcat((char*)s3,(char*)s2);
+        			//sprintf((char*)s3, "%d", Hash((char*)s3));
                     db_list list_tmp=db->create_list((char*)s3,'d');
                     list_tmp.push_tail(keys[j]);
                     map_tmp.add(val,s3);
@@ -529,6 +543,127 @@ struct table{
         }
         printf("Index set done.\n");
         return 1;
+    }
+    
+    bool update_index(unsigned char s[],unsigned int i, 
+    				  unsigned int val1,unsigned int val2,
+    				  int mode){//mode:1:add 2: delete 3:edit
+    	if(!index.exists(s)){
+    	    return 0;
+    	}
+    	
+       	unsigned char ind[v_len];
+    	index.get_by_key(s,ind);//读该列索引
+    	db_map map_tmp=db->get_map((char*)ind);
+    	unsigned char res[v_len];
+		if(mode!=1){
+			////暴力删除链表中节点
+			map_tmp.get_by_key(val1,res);//读结果链表
+			db_list list_tmp=db->get_list((char*)res);
+			unsigned int keys[list_tmp.size];
+			list_tmp.get_all_value(keys);
+			int ii=0;
+			while(ii<list_tmp.size){
+				if(keys[ii]!=i)ii++;
+				else break;
+			}
+			for(;ii<list_tmp.size-1;ii++){
+				list_tmp.update(ii,keys[ii+1]);
+			}
+			list_tmp.pop_tail();
+			if(list_tmp.size==0){//如果list里没东西了就删掉?
+				//db->delete_list((char*)res);	
+			}
+		}
+		
+    	//如果是删除就返回了
+    	if(mode==2) return 1;
+    	
+    	//加入另一个链表
+    	if(map_tmp.exists(val2)){
+    		map_tmp.get_by_key(val2,res);//读结果链表
+    		db_list list_tmp2=db->get_list((char*)res);
+            list_tmp2.push_tail(i);
+    	} else {
+       		///表名+列名+键
+       		unsigned char s_l[k_len],s_n[k_len];
+       		strcpy((char*)s_l,name);
+       		strcat((char*)s_l,(char*)s);
+            sprintf((char*)s_n,"%d",val2);
+            strcat((char*)s_l,(char*)s_n);
+        	//sprintf((char*)s_l, "%d", Hash((char*)s_l));
+            db_list list_tmp2=db->create_list((char*)s_l,'d');
+            list_tmp2.push_tail(i);
+            map_tmp.add(val2,s_l);
+        }
+    	     	
+    	return 1;
+    }
+       
+    bool update_index(unsigned char s[],unsigned int i, 
+    				  unsigned char val1[],unsigned char val2[],
+    				  int mode){//mode:1:add 2: delete 3:edit   	
+    	if(!index.exists(s)){
+    	    return 0;
+    	}
+    	
+       	unsigned char ind[v_len];
+    	index.get_by_key(s,ind);//读该列索引
+    	db_map map_tmp=db->get_map((char*)ind);
+    	unsigned char res[v_len];
+    	unsigned char s_tmp[v_len];
+   	
+    	if(mode!=1){
+			for(int k1=0;k1<strlen((char*)val1);k1++){///取val１所有长度大于等于2的子串
+				for(int k2=k1+1;k2<strlen((char*)val1);k2++){//暴力删除链表中节点
+					memset(s_tmp,0,sizeof(s_tmp));
+		            memcpy(s_tmp,val1+k1,k2-k1+1);
+					map_tmp.get_by_key(s_tmp,res);//读结果链表
+					db_list list_tmp=db->get_list((char*)res);
+					unsigned int keys[list_tmp.size];
+					list_tmp.get_all_value(keys);
+					int ii=0;
+					while(ii<list_tmp.size){
+						if(keys[ii]!=i)ii++;
+						else break;
+					}
+					for(;ii<list_tmp.size-1;ii++){
+						list_tmp.update(ii,keys[ii+1]);
+					}
+					list_tmp.pop_tail();
+					if(list_tmp.size==0){//如果list里没东西了就删掉?
+						//db->delete_list((char*)res);
+					}
+				}
+		    }//*/
+        }
+    
+    	//如果是删除就返回了
+    	if(mode==2) return 1;
+			
+		for(int k1=0;k1<strlen((char*)val2);k1++){///取val2所有长度大于等于2的子串
+			for(int k2=k1+1;k2<strlen((char*)val2);k2++){//加入另一个链表
+				memset(s_tmp,0,sizeof(s_tmp));
+                memcpy(s_tmp,val2+k1,k2-k1+1);
+                if(map_tmp.exists(s_tmp)){
+                    map_tmp.get_by_key(s_tmp,res);
+                    db_list list_tmp=db->get_list((char*)res);
+                    list_tmp.push_tail(i);
+                } else {
+                	unsigned char s_l[k_len];
+       				strcpy((char*)s_l,name);
+       				strcat((char*)s_l,(char*)s);
+            		strcat((char*)s_l,(char*)s_tmp);
+            		sprintf((char*)s_l, "%d", Hash((char*)s_l));
+                
+                    db_list list_tmp=db->create_list((char*)s_l,'d');
+                    list_tmp.push_tail(i);
+                    map_tmp.add(s_tmp,s_l);
+               }
+			}
+    	}
+    	
+    	return 1;
     }
 
     vector<unsigned int> find_by_index(unsigned char s[],unsigned int val){
@@ -664,22 +799,24 @@ struct table{
         item item_tmp=get_item(i);
         unsigned char keys[c][v_len];
         //column.get_all_key(keys);
-        unsigned int type,in_i=0;
-        unsigned char in_s[v_len]="";
+        unsigned int type,in_i=0,in_i0=0;
+        unsigned char in_s[v_len]="",in_s0[v_len]="";
 
         for(int j=0;j<c;j++){
         	_column.get_by_key((unsigned)(j+1),keys[j]);
             column.get_by_key(keys[j],&type);
             if(type=='d'){
-            	item_tmp.get_val(keys[j],&in_i);
-                printf("Now: %d\nNew for item %d, column %s: ",in_i,i,keys[j]);
+            	item_tmp.get_val(keys[j],&in_i0);
+                printf("Now: %d\nNew for item %d, column %s: ",in_i0,i,keys[j]);
                 scanf("%d",&in_i);
                 item_tmp.modify_val(keys[j],in_i);///int
+        		update_index(keys[j],i,in_i0,in_i,3);
             } else {
-            	item_tmp.get_val(keys[j],in_s);
-                printf("Now: %s\nNew for item %d, column %s: ",in_s,i,keys[j]);
+            	item_tmp.get_val(keys[j],in_s0);
+                printf("Now: %s\nNew for item %d, column %s: ",in_s0,i,keys[j]);
                 scanf("%s",in_s);
                 item_tmp.modify_val(keys[j],in_s);///string
+        		update_index(keys[j],i,in_s0,in_s,3);
             }
         }
         ///index
@@ -704,17 +841,21 @@ struct table{
         unsigned char keys[c][v_len];
         //column.get_all_key(keys);
         unsigned int type;
-
         for(int j=0;j<len;j++){
         	_column.get_by_key((unsigned)(j+ii),keys[j]);
             column.get_by_key(keys[j],&type);
             if(type=='d'){
-            	unsigned in_i=va_arg(args,unsigned int);
+            	unsigned in_i0,in_i=va_arg(args,unsigned int);
+            	item_tmp.get_val(keys[j],&in_i0);
                 item_tmp.modify_val(keys[j],in_i);///int
+        		update_index(keys[j],i,in_i0,in_i,3);
             } else {
+            	unsigned char in_s0[v_len];
         		unsigned char* in_s=va_arg(args,unsigned char *);
+            	item_tmp.get_val(keys[j],in_s0);
             	//printf("!!!%s\n",in_s);
                 item_tmp.modify_val(keys[j],in_s);///string
+        		update_index(keys[j],i,in_s0,in_s,3);
             }
         }
         return 1;
@@ -739,18 +880,22 @@ struct table{
         		unsigned char s_tmp[v_len];
         		const char* s_tem=v[k].c_str();
         		strcpy((char*)s_tmp,s_tem);
-        		unsigned int in_i=0;
+        		unsigned int in_i0,in_i=0;
         		int len=strlen(s_tem);
         		for(int j=0;j<len;j++){
         			in_i*=10;
         			in_i+=(s_tmp[j]-'0');
         		}
+            	item_tem.get_val(keys[k],&in_i0);
         		item_tem.modify_val(keys[k],in_i);
+        		update_index(keys[k],i,in_i0,in_i,3);
         	} else {
-        		unsigned char s_tmp[v_len];
+        		unsigned char s_tmp[v_len],in_s0[v_len];
         		const char* s_tem=v[k].c_str();
         		strcpy((char*)s_tmp,s_tem);
+        		item_tem.get_val(keys[k],in_s0);
         		item_tem.modify_val(keys[k],s_tmp);
+        		update_index(keys[k],i,in_s0,s_tmp,3);
         	}
         }
         return 1;
@@ -760,8 +905,16 @@ struct table{
 		if(!column.exists(s)){
     	    printf("Column %s doesn't exsit!\n",s);
     		return  0;
-    	}//校验存在
+    	}//校验存在    
+    		
+    	unsigned int type;
+    	column.get_by_key(s,&type);
+    	if(type=='s'){
+    	    printf("column %s is type of string!\n",s);
+    		return 0;
+    	}//校验类型
     	
+    	unsigned int in_i0;
     	for(int j=0;j<v.size();j++){
     		unsigned int i=v[j];
     		if(!items.exists(i)){
@@ -769,7 +922,9 @@ struct table{
     			continue;
     		}
     		item item_tmp=get_item(i);
+    		item_tmp.get_val(s,&in_i0);
     		item_tmp.modify_val(s,val);
+        	update_index(s,i,in_i0,val,3);
     	}
     	
 		return 1;
@@ -780,7 +935,14 @@ struct table{
     	    printf("Column %s doesn't exsit!\n",s);
     		return  0;
     	}//校验存在
+    	unsigned int type;
+    	column.get_by_key(s,&type);
+    	if(type=='d'){
+    	    printf("column %s is type of unsigned int!\n",s);
+    		return 0;
+    	}//校验类型
     	
+    	unsigned char in_s0[v_len];
     	for(int j=0;j<v.size();j++){
     		unsigned int i=v[j];
     		if(!items.exists(i)){
@@ -788,7 +950,9 @@ struct table{
     			continue;
     		}
     		item item_tmp=get_item(i);
+    		item_tmp.get_val(s,in_s0);
     		item_tmp.modify_val(s,val);
+        	update_index(s,i,in_s0,val,3);
     	}
     	
 		return 1;
@@ -805,11 +969,25 @@ struct table{
        	r--;
 
         item item_tmp=get_item(i);
-        item_tmp.clear_all();
-        item_tmp.delete_all();
 
         ///index
+		unsigned int type,num=index.get_size(),in_i0,in_i;
+		unsigned char in_s0[v_len],in_s;
+		unsigned char keys[num][k_len];
+		index.get_all_key(keys);
+		for(int i=0;i<num;i++){
+			column.get_by_key(keys[i],&type);
+			if(type=='d'){
+				item_tmp.get_val(keys[i],&in_i0);
+				update_index(keys[i],num,in_i0,in_i0,2);
+			} else { 
+				item_tmp.get_val(keys[i],in_s0);
+				update_index(keys[i],num,in_s0,in_s0,2);
+			}
+		}
 
+        item_tmp.delete_all();
+        
         items.drop(i);
         printf("Item %d deleted done.\n",i);
         return 1;
@@ -874,16 +1052,18 @@ struct table{
     	unsigned int keys[r];
     	items.get_all_key(keys);
     	for(int i=0;i<r;i++){
-    		delete_item(keys[i]);
+    		item item_tmp=get_item(keys[i]);
+    		item_tmp.delete_all();
     	}
     	db->delete_list(name_items_empty);
     	db->delete_map(name_items);
     	db->delete_map(name_column);
+    	db->delete_map(name__column);
 		//index
 		int num=index.get_size();
 		unsigned char all_indexs[num][k_len];
 		index.get_all_key(all_indexs);
-
+		
 		unsigned char s[v_len];
 		for(int i=0;i<num;i++){
 			index.get_by_key(all_indexs[i],s);
@@ -898,6 +1078,7 @@ struct table{
 				map_tmp.get_by_key(all_lists[j],s2);
 				db->delete_list((char*)s2);
 			}
+    		db->delete_map((char*)s);
 		}
     	db->delete_map(name_index);
 
