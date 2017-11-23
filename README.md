@@ -8,6 +8,7 @@
 
 ## 环境说明
 + Linux/Ubuntu 16.04
++ 基于Storage System
 
 ## 实现方法
 ### item （元组）类
@@ -19,7 +20,7 @@
 ### table.h : table ( 表 ) 类
 表存放多个元组类的信息；
 
-同时维护该表上的索引；
+同时维护该表上的索引，表现为，在进行增删改操作时，同时对已建立的索引进行修改；
 
 + 表中含4个map，1个list；
 
@@ -170,30 +171,66 @@ ___
 	+ 若该索引已建立则更新；
 	+ 成功返回1；
 
++ bool update_index(unsigned char s[],unsigned int i, 
+    				  unsigned char val1[],unsigned char val2[],
+    				  int mode)
+
+	+ 更新第i列索引；
+	+ 该函数对上一层用户透明；
+
++ `bool update_index(unsigned char s[],unsigned int i, 
+    				  unsigned int val1,unsigned int val2,
+    				  int mode)`
+
+	+ 更新第i列索引；
+	+ 该函数对上一层用户透明；
+
 + `vector<unsigned int> find_by\_index(unsigned int i,unsigned val)`
 
-	+ 在第i列上搜索值为val的元组；
+	+ 在第i列上通过索引搜索值为val的元组；
 	+ 返回满足条件的item的编号的vector；
 
 +  `vector<unsigned int> find_by\_index(unsigned int i,unsigned char s[])`
 
-	+ 在第i列上搜索包含s的元组；
+	+ 在第i列上通过索引搜索包含s的元组；
+	+ 字符串长度需要大于等于2；
 	+ 返回满足条件的item的编号的vector；
+
++ `vector<unsigned int> find_from_all(unsigned  s[],unsigned int val)`
+
+	+ 在第i列上搜索包含s的元组；	
+	+ 返回满足条件的item的编号的vector；
+
++ `vector<unsigned int> find_from_all(unsigned char s[],unsigned char val[])`
+
+	+ 在第i列上搜索包含s的元组；	
+	+ 返回满足条件的item的编号的vector；
+
 
 +  `bool edit_item(unsigned int i)`
 
-	+ 直接编辑第 i 条元组（键入）；
+	+ 编辑第 i 条元组（键入）；
 	+ 成功返回1；
 
 + `bool edit_item(unsigned int i,unsigned int ii,unsigned int len,...)`
 
-	+ 直接编辑第 i 条元组从第 ii 个属性开始的len个元组（参数输入）；
+	+ 编辑第 i 条元组从第 ii 个属性开始的len个元组（参数输入）；
 	+ 成功返回1；
 
 + `bool edit_item(unsigned int i,unsigned int ii,vector<string> v)`
 
-	+ 直接编辑第 i 条元组从第 ii 个属性开始的若干个元组；
+	+ 编辑第 i 条元组从第 ii 个属性开始的若干个元组（容器输入）；
 	+ 成功返回 1 ；
+
++ `bool edit_items(unsigned char s[],vector<unsigned int>v,unsigned int val)`
+	
+	+ 编辑第若干个元组的 s 属性；（容器输入）
+	+ 编辑为同一值；
+
++ `bool edit_items(unsigned char s[],vector<unsigned>v,unsigned char val[])`
+
+	+ 编辑第若干个元组的 s 属性；（容器输入）
+	+ 编辑为同一值；
 
 + `bool delete_item(unsigned int i)`
 
@@ -222,6 +259,5 @@ ___
 + table名+"_column\_type"
 + table名+"_index"
 + table名+列名
-+ table名+列名+列值
 + table名+"_items"+编号
 + table名+"_items"+编号+“_l”
