@@ -9,11 +9,11 @@
 unsigned int Hash(char *str){//BKDR字符串哈希
     unsigned int seed = 131; // 31 131 1313 13131 131313 etc..
     unsigned int hash = 0;
- 
+
     while (*str){
         hash = hash * seed + (*str++);
     }
- 
+
     return (hash & 0x7FFFFFFF);
 }
 
@@ -83,7 +83,7 @@ struct table{
             printf("create done.\n");
         }
     }
-	
+
 
     bool add_column(unsigned char s[],char type){///添加名为s的int列。值为空
         if(column.exists(s)){
@@ -360,8 +360,8 @@ struct table{
 
         items.get_all_key(keys);
         string nul="";
-        v.push_back(nul);   
-             
+        v.push_back(nul);
+
         for(int i=0;!i;i++){
         	memset(tmp,0,sizeof(tmp));
         	item item_tmp=get_item(keys[i]);
@@ -370,7 +370,7 @@ struct table{
         	for(int j=1;j<keys[i]-1;j++)v.push_back(nul);
         	v.push_back(ss);
         }
-        
+
         for(int i=1;i<r;i++){
         	memset(tmp,0,sizeof(tmp));
         	item item_tmp=get_item(keys[i]);
@@ -405,21 +405,21 @@ struct table{
 
         items.get_all_key(keys);
         v.push_back((unsigned)0);
-        
+
         for(int i=0;!i;i++){
         	item item_tmp=get_item(keys[i]);
         	item_tmp.get_val(s,&tmp);
         	for(int j=1;j<keys[i]-1;j++)v.push_back((unsigned)0);
         	v.push_back(tmp);
         }
-        	
+
         for(int i=1;i<r;i++){
         	item item_tmp=get_item(keys[i]);
         	item_tmp.get_val(s,&tmp);
         	for(int j=1;j<keys[i]-keys[i-1];j++)v.push_back((unsigned)0);
         	v.push_back(tmp);
         }
-        
+
     	return v;
 	}
 
@@ -552,14 +552,14 @@ struct table{
         printf("Index set done.\n");
         return 1;
     }
-    
-    bool update_index(unsigned char s[],unsigned int i, 
+
+    bool update_index(unsigned char s[],unsigned int i,
     				  unsigned int val1,unsigned int val2,
     				  int mode){//mode:1:add 2: delete 3:edit
     	if(!index.exists(s)){
     	    return 0;
     	}
-    	
+
        	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
@@ -580,13 +580,13 @@ struct table{
 			}
 			list_tmp.pop_tail();
 			if(list_tmp.size==0){//如果list里没东西了就删掉?
-				//db->delete_list((char*)res);	
+				//db->delete_list((char*)res);
 			}
 		}
-		
+
     	//如果是删除就返回了
     	if(mode==2) return 1;
-    	
+
     	//加入另一个链表
     	if(map_tmp.exists(val2)){
     		map_tmp.get_by_key(val2,res);//读结果链表
@@ -604,23 +604,23 @@ struct table{
             list_tmp2.push_tail(i);
             map_tmp.add(val2,s_l);
         }
-    	     	
+
     	return 1;
     }
-       
-    bool update_index(unsigned char s[],unsigned int i, 
+
+    bool update_index(unsigned char s[],unsigned int i,
     				  unsigned char val1[],unsigned char val2[],
-    				  int mode){//mode:1:add 2: delete 3:edit   	
+    				  int mode){//mode:1:add 2: delete 3:edit
     	if(!index.exists(s)){
     	    return 0;
     	}
-    	
+
        	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
     	unsigned char res[v_len];
     	unsigned char s_tmp[v_len];
-   	
+
     	if(mode!=1){
 			for(int k1=0;k1<strlen((char*)val1);k1++){///取val１所有长度大于等于2的子串
 				for(int k2=k1+1;k2<strlen((char*)val1);k2++){//暴力删除链表中节点
@@ -645,10 +645,10 @@ struct table{
 				}
 		    }//*/
         }
-    
+
     	//如果是删除就返回了
     	if(mode==2) return 1;
-			
+
 		for(int k1=0;k1<strlen((char*)val2);k1++){///取val2所有长度大于等于2的子串
 			for(int k2=k1+1;k2<strlen((char*)val2);k2++){//加入另一个链表
 				memset(s_tmp,0,sizeof(s_tmp));
@@ -663,16 +663,79 @@ struct table{
        				strcat((char*)s_l,(char*)s);
             		strcat((char*)s_l,(char*)s_tmp);
             		sprintf((char*)s_l, "%d", Hash((char*)s_l));
-                
+
                     db_list list_tmp=db->create_list((char*)s_l,'d');
                     list_tmp.push_tail(i);
                     map_tmp.add(s_tmp,s_l);
                }
 			}
     	}
-    	
+
     	return 1;
     }
+
+    vector<unsigned int> find_val(unsigned char s[],unsigned int val){
+       if(index.exists(s))
+            return find_by_index(s,val);
+       else return find_from_all(s,val);
+    }
+
+    vector<unsigned int> find_val(unsigned char s[],unsigned int val[]){
+       if(index.exists(s)&&strlen((char*)val)>=2)
+            return find_by_index(s,val);
+       else return find_from_all(s,val);
+    }
+
+    vector<unsigned int> find_val_eql(unsigned char s[],unsigned int val[]){
+       if(index.exists(s)&&strlen((char*)val)>=2)
+            return find_by_index_eql(s,val);
+       else return find_from_all_eql(s,val);
+    }
+
+    vector<unsigned int> find_by_index_eql(unsigned char s[],unsigned char val[]){
+    //在名为s的列上利用索引搜索值包含val(string)的元组
+    //返回满足条件的item的编号的vector；
+        vector<unsigned int> v;
+    	if(!index.exists(s)){
+    	    printf("Index for %s doesn't exsit!\n",s);
+    		return  v;
+    	}//校验存在
+    	unsigned int type;
+    	column.get_by_key(s,&type);
+    	if(type=='d'){
+    	    printf("column %s is type of unsigned int!\n",s);
+    		return v;
+    	}//校验类型
+    	if(strlen((char*)val)<2){
+    	    printf("Please enter at least 2 chars!\n");
+    		return v;
+    	}//至少输入两个字符
+
+    	unsigned char ind[v_len];
+    	index.get_by_key(s,ind);//读该列索引
+    	db_map map_tmp=db->get_map((char*)ind);
+
+		if(!map_tmp.exists(val)){
+			printf("There is no item include val:  %s\n",val);
+			return v;
+		}
+    	unsigned char res[v_len];//读结果链表
+    	map_tmp.get_by_key(val,res);
+    	db_list list_tmp=db->get_list((char*)res);
+		//printf("%d\n",list_tmp.self.filenum);
+
+    	unsigned int keys[list_tmp.size];//塞进vector返回
+    	list_tmp.get_all_value(keys);
+    	for(int j=0;j<list_tmp.size;j++){
+            item item_tmp=get_item(keys[j]);
+            char sss[v_len];
+            item_tmp.get_val(s,(unsigned char*)sss);
+            if(strcmp(sss,(char*)val)==0)
+                v.push_back(keys[j]);
+    	}
+		return  v;
+    }
+
 
     vector<unsigned int> find_by_index(unsigned char s[],unsigned int val){
     //在名为s的列上利用索引搜索值为val(无符号整型)的元组
@@ -688,7 +751,7 @@ struct table{
     	    printf("column %s is type of string!\n",s);
     		return v;
     	}//校验类型
-    	
+
     	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
@@ -727,7 +790,7 @@ struct table{
     	    printf("Please enter at least 2 chars!\n");
     		return v;
     	}//至少输入两个字符
-    	
+
     	unsigned char ind[v_len];
     	index.get_by_key(s,ind);//读该列索引
     	db_map map_tmp=db->get_map((char*)ind);
@@ -748,7 +811,7 @@ struct table{
     	}
 		return  v;
     }
-    
+
     vector<unsigned int> find_from_all(unsigned char s[],unsigned int val){
         //在名为s的列上搜索值为val(无符号整型)的元组，返回满足条件的item的编号的vector；
     	vector<unsigned int> v;
@@ -762,17 +825,17 @@ struct table{
     	    printf("column %s is type of string!\n",s);
     		return v;
     	}//校验类型
-    	
+
     	vector<unsigned int> v_tmp = get_column_i(s);
     	for(unsigned int i=1;i<v_tmp.size();i++){
     		if(items.exists(i)){
     			if(v_tmp[i]==val) v.push_back(i);
     		}
     	}
-    	
+
     	return v;
     }
-    
+
     vector<unsigned int> find_from_all(unsigned char s[],unsigned char val[]){
         //在名为s的列上搜索包含val(string)的元组，返回满足条件的item的编号的vector；
     	vector<unsigned int> v;
@@ -786,14 +849,41 @@ struct table{
     	    printf("column %s is type of unsigned int!\n",s);
     		return v;
     	}//校验类型
-    	    	
+
     	vector<string> v_tmp = get_column_s(s);
     	for(unsigned int i=1;i<v_tmp.size();i++){
     		if(items.exists(i)){
     			if(v_tmp[i].find((char*)val)!=string::npos) v.push_back(i);
     		}
     	}
-    	
+
+    	return v;
+    }
+
+    vector<unsigned int> find_from_all_eql(unsigned char s[],unsigned char val[]){
+        //在名为s的列上搜索包含val(string)的元组，返回满足条件的item的编号的vector；
+    	vector<unsigned int> v;
+    	if(!column.exists(s)){
+    	    printf("Column %s doesn't exsit!\n",s);
+    		return  v;
+    	}
+    	unsigned int type;
+    	column.get_by_key(s,&type);
+    	if(type=='d'){
+    	    printf("column %s is type of unsigned int!\n",s);
+    		return v;
+    	}//校验类型
+
+    	vector<string> v_tmp = get_column_s(s);
+    	for(unsigned int i=1;i<v_tmp.size();i++){
+    		if(items.exists(i)){
+    		    string sss=(char*)val;
+    			if(v_tmp[i]==sss) {
+                        v.push_back(i);
+    			}
+    		}
+    	}
+
     	return v;
     }
 
@@ -908,20 +998,20 @@ struct table{
         }
         return 1;
     }
-	
+
 	bool edit_items(unsigned char s[],vector<unsigned int>v,unsigned int val){
 		if(!column.exists(s)){
     	    printf("Column %s doesn't exsit!\n",s);
     		return  0;
-    	}//校验存在    
-    		
+    	}//校验存在
+
     	unsigned int type;
     	column.get_by_key(s,&type);
     	if(type=='s'){
     	    printf("column %s is type of string!\n",s);
     		return 0;
     	}//校验类型
-    	
+
     	unsigned int in_i0;
     	for(int j=0;j<v.size();j++){
     		unsigned int i=v[j];
@@ -934,10 +1024,10 @@ struct table{
     		item_tmp.modify_val(s,val);
         	update_index(s,i,in_i0,val,3);
     	}
-    	
+
 		return 1;
 	}
-	
+
 	bool edit_items(unsigned char s[],vector<unsigned>v,unsigned char val[]){
 		if(!column.exists(s)){
     	    printf("Column %s doesn't exsit!\n",s);
@@ -949,7 +1039,7 @@ struct table{
     	    printf("column %s is type of unsigned int!\n",s);
     		return 0;
     	}//校验类型
-    	
+
     	unsigned char in_s0[v_len];
     	for(int j=0;j<v.size();j++){
     		unsigned int i=v[j];
@@ -962,10 +1052,10 @@ struct table{
     		item_tmp.modify_val(s,val);
         	update_index(s,i,in_s0,val,3);
     	}
-    	
+
 		return 1;
 	}
-	
+
 
     bool delete_item(unsigned int i){
         if(!items.exists(i)){
@@ -988,14 +1078,14 @@ struct table{
 			if(type=='d'){
 				item_tmp.get_val(keys[i],&in_i0);
 				update_index(keys[i],num,in_i0,in_i0,2);
-			} else { 
+			} else {
 				item_tmp.get_val(keys[i],in_s0);
 				update_index(keys[i],num,in_s0,in_s0,2);
 			}
 		}
 
         item_tmp.delete_all();
-        
+
         items.drop(i);
         printf("Item %d deleted done.\n",i);
         return 1;
@@ -1007,9 +1097,9 @@ struct table{
     		printf("There is no column '%s' !\n",s);
     		return 0;
     	}//检查存在
-    	
+
     	unsigned int i;
-    	
+
     	//删除该列索引
     	if(index.exists(s)){
     		unsigned char s1[v_len];
@@ -1026,8 +1116,8 @@ struct table{
 				db->delete_list((char*)s2);
 			}
     	}
-    	
-    	//删除元组上该列数据        
+
+    	//删除元组上该列数据
     	int num=items.get_size();
         unsigned int keys[num];
         items.get_all_key(keys);
@@ -1035,7 +1125,7 @@ struct table{
     		item item_tmp=get_item(keys[i]);
     		item_tmp.delete_val(s);
     	}
-    	
+
     	//修改表信息
     	unsigned char ss[v_len];
     	for(i=1;i<=c;i++){
@@ -1050,9 +1140,9 @@ struct table{
     	}
     	_column.drop(i);
     	column.drop(s);
-    	
+
     	c--;
-    	    	
+
     	return 1;
     }
 
@@ -1071,7 +1161,7 @@ struct table{
 		int num=index.get_size();
 		unsigned char all_indexs[num][k_len];
 		index.get_all_key(all_indexs);
-		
+
 		unsigned char s[v_len];
 		for(int i=0;i<num;i++){
 			index.get_by_key(all_indexs[i],s);
