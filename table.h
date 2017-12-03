@@ -350,6 +350,10 @@ struct table{
     		printf("Type of column '%s' is unsigned int!\n",s);
     		return v;
     	}//检查类型
+	if(r==0){
+		printf("There is no item in this table!\n");
+		return v;
+	}
 
         unsigned char tmp[v_len];
         unsigned int keys[r];
@@ -391,6 +395,10 @@ struct table{
     		printf("Type of column '%s' is string!\n",s);
     		return v;
     	}//检查类型
+	if(r==0){
+		printf("There is no item in this table!\n");
+		return v;
+	}
 
     	unsigned int tmp;
         unsigned int keys[r];
