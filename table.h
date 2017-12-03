@@ -680,13 +680,13 @@ struct table{
        else return find_from_all(s,val);
     }
 
-    vector<unsigned int> find_val(unsigned char s[],unsigned int val[]){
+    vector<unsigned int> find_val(unsigned char s[],unsigned char val[]){
        if(index.exists(s)&&strlen((char*)val)>=2)
             return find_by_index(s,val);
        else return find_from_all(s,val);
     }
 
-    vector<unsigned int> find_val_eql(unsigned char s[],unsigned int val[]){
+    vector<unsigned int> find_val_eql(unsigned char s[],unsigned char val[]){
        if(index.exists(s)&&strlen((char*)val)>=2)
             return find_by_index_eql(s,val);
        else return find_from_all_eql(s,val);
