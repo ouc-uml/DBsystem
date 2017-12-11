@@ -56,7 +56,11 @@ struct table{
         db_struct *_db=new db_struct(1);
         db=_db;
         
-    	all_table=db->get_map(name_all_table);
+        if(db->exists_map(name_all_table))
+    		all_table=db->get_map(name_all_table);
+    	else {
+    		all_table=db->create_map(name_all_table,'s','d');
+    	}
     	
         if(all_table.exists((unsigned char*)s)){
         	printf("loading now...\n");
@@ -211,7 +215,7 @@ struct table{
         		update_index(keys[i],num,nul,nul,1);
         	}
         }
-
+		
         if(!items.exists(num)){
         	items.add(num,(unsigned char *)s);
         	printf("Item %d add done.\n",num);
