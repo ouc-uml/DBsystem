@@ -1,4 +1,4 @@
-#include "table->h"
+#include "table.h"
 #include<iostream>
 
 int main(){
@@ -7,18 +7,12 @@ int main(){
 	std:: string s;
 	bool flag = 1;
 	
-	if(){
-		db_map=db.create_map();
-	} else{
-	
-	}
-	
 	table *t;
 	
 	std::cout<<"Choose a table: ";
 	std::cin>>s;
-	if(){}
-	t=new table(s);
+	
+	t=new table(s.data());
 	
 	while(flag){
 		std:cout<<">>";
@@ -59,10 +53,10 @@ int main(){
 						unsigned int val;
 						std::cin>>ss;
 						val=ss[0]-'0';
-                		item_tmp->modify_val(keys[j],val);///int
+                		item_tmp.modify_val(keys[j],val);///int
 					}else{
 						std::cin>>ss;
-                		item_tmp->modify_val(keys[j],ss);///string
+                		item_tmp.modify_val(keys[j],ss);///string
 					}
 				}
 		    	t->show_all();
@@ -79,8 +73,15 @@ int main(){
 		    	t->show_all();
 		}else if(s=="exit"){
 				flag=0;
+		}else if(s=="change"){
+			delete t;
+			std::cout<<"Choose a table: ";
+			std::cin>>s;
+	
+			t=new table(s.data());
 		}
 		
 	}
+	delete t;
 	return 0;
 }
