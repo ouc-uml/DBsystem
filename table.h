@@ -21,6 +21,9 @@ unsigned int Hash(char *str){//BKDR字符串哈希
 // 操作函数囊括 增 查 改 删 管理
 
 struct table{
+	const char name_all_table[k_len]="all_table";
+	db_map all_table;
+	
     char name[k_len];
     char name_items[k_len];
     char name_items_empty[k_len];
@@ -37,7 +40,7 @@ struct table{
     //int c_d;//被删除的元组数
 
 
-    table(const char s[]){///建立空表，若已存在则读入
+    table(const char s[k_len]){///建立空表，若已存在则读入
         strcpy(name,s);
         strcpy(name_items,s);
         strcpy(name_items_empty,s);
@@ -52,8 +55,10 @@ struct table{
         strcat(name_index,"_index");
         db_struct *_db=new db_struct(1);
         db=_db;
-
-        if(db->exists_map((char*)name_items)){
+        
+    	all_table=db->get_map(name_all_table);
+    	
+        if(all_table.exists((unsigned char*)s)){
         	printf("loading now...\n");
             items=db->get_map(name_items);
             items_empty=db->get_list(name_items_empty);
@@ -71,8 +76,10 @@ struct table{
             r=items.get_size();//-items_empty.size;
             c=column.get_size();
             //c_d=_column.get_size();c_d-=c;
-        }else{
+        }else{    
             printf("creating now...\n");
+            all_table.add((unsigned char*)s,(unsigned)1);
+            
             items=db->create_map(name_items,'d','s');
             items_empty=db->create_list(name_items_empty,'d');
             column=db->create_map(name_column,'s','d');
@@ -1179,6 +1186,7 @@ struct table{
     		db->delete_map((char*)s);
 		}
     	db->delete_map(name_index);
+    	all_table.drop((unsigned char*)name);
 
     	printf("table %s has been destroyed.\n",name);
     }

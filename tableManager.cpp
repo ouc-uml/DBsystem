@@ -3,17 +3,28 @@
 
 int main(){
 	load_configuration();
+	
 	db_struct db(1);
+	const char name_all_table[k_len]="all_table";
+	db_map all_table=db.get_map(name_all_table);
+	unsigned char all_tables[all_table.get_size()][k_len];
+	
+	all_table.get_all_key(all_tables);
+	for(int i=0;i<all_table.get_size();i++){
+		std::cout<<all_tables[i]<<endl;
+	}
+	
 	std:: string s;
-	bool flag = 1;
-	
 	table *t;
-	
 	std::cout<<"Choose a table: ";
 	std::cin>>s;
+	char sss[k_len]="";
+	for(int i=0;i<s.size();i++){
+		sss[i]=s[i];
+	}
+	t=new table(sss);
 	
-	t=new table(s.data());
-	
+	bool flag = 1;	
 	while(flag){
 		std:cout<<">>";
 		std::cin>>s;
@@ -74,11 +85,19 @@ int main(){
 		}else if(s=="exit"){
 				flag=0;
 		}else if(s=="change"){
-			delete t;
+			delete t;	
+			all_table.get_all_key(all_tables);
+			for(int i=0;i<all_table.get_size();i++){
+				std::cout<<all_tables[i]<<endl;
+			}
 			std::cout<<"Choose a table: ";
 			std::cin>>s;
 	
-			t=new table(s.data());
+			char ssss[k_len]="";
+			for(int i=0;i<s.size();i++){
+				ssss[i]=s[i];
+			}
+			t=new table(ssss);
 		}
 		
 	}
